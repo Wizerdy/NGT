@@ -1,0 +1,15 @@
+{
+    "name": "Project",
+    "references": [
+        "GUID:2eab34e093056924a9c057e6c5ed8643"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
