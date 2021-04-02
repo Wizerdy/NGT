@@ -4,12 +4,10 @@ using UnityEngine;
 using ToolsBoxEngine;
 
 namespace Project {
-    public enum AttackType { SINGLE, MULTIPLE }
-
     public abstract class AttackObject : ScriptableObject {
         public GameObject attack;
-        [HideInInspector] public AttackType type = AttackType.SINGLE;
-        [SerializeField] private int damage;
+        [SerializeField] protected int damage;
+        protected int touchNumber;
 
         #region Properties
 
@@ -17,24 +15,30 @@ namespace Project {
             get { return damage; }
         }
 
+        public int TouchNumber {
+            get { return touchNumber; }
+        }
+
         #endregion
 
         public AttackObject() {
-            type = AttackType.SINGLE;
+            touchNumber = 0;
         }
 
         #region Attack range
 
-        public virtual Nullable<Vector2Int>[] AttackRange(int x, int y) {
-            return null;
-        }
+        //public virtual Nullable<Vector2Int>[] AttackRange(int x, int y) {
+        //    return null;
+        //}
 
-        public Nullable<Vector2Int>[] AttackRange(Vector2Int coord) {
-            return AttackRange(coord.x, coord.y);
-        }
+        //public Nullable<Vector2Int>[] AttackRange(Vector2Int coord) {
+        //    return AttackRange(coord.x, coord.y);
+        //}
 
         public virtual Nullable<Vector2Int>[] AttackRange(params Vector2Int[] coords) {
-            return null;
+            if (coords.Length > touchNumber) { Debug.LogError("Trying to call with too much coordinates (" + name + ")"); return null; }
+            if (coords.Length < touchNumber) { Debug.LogError("Trying to call with not enough coordinates (" + name + ")"); return null; }
+            return coords.ToNullableArray();
         }
 
         public Nullable<Vector2Int>[] AttackRange(params int[] coords) {

@@ -79,6 +79,22 @@ namespace Project {
             return IsOutOfBounds(coord.x, coord.y);
         }
 
+        public bool IsOutOfBounds(Vector2 position) {
+            position = position - this.position;
+            if (position.x > 0 &&
+                position.x < cellSize.x * cells.Length &&
+                position.y > 0 &&
+                position.y < cellSize.y * cells.Length
+            ) {
+                return false;
+            }
+            return true;
+        }
+
+        public bool IsOutOfBounds(float x, float y) {
+            return IsOutOfBounds(new Vector2(x, y));
+        }
+
         public bool IsEmpty(int x, int y) {
             return cells[x][y].IsEmpty;
         }

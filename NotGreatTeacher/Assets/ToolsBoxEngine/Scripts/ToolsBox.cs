@@ -194,6 +194,22 @@ namespace ToolsBoxEngine {
             return returnBack;
         }
 
+        public static Nullable<T>[] ToNullableArray<T>(this T[] array) where T : struct {
+            Nullable<T>[] returnBack = new Nullable<T>[array.Length];
+            for (int i = 0; i < array.Length; i++) {
+                returnBack[i] = (Nullable<T>)array[i];
+            }
+            return returnBack;
+        }
+
+        public static List<T> ToList<T>(this List<Nullable<T>> list) where T : struct {
+            List<T> returnBack = new List<T>();
+            for (int i = 0; i < list.Count; i++) {
+                returnBack.Add(list[i].Value);
+            }
+            return returnBack;
+        }
+
         #endregion
     }
 }

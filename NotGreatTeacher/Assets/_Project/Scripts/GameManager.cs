@@ -40,6 +40,7 @@ namespace Project {
         [SerializeField] private float enemySpeed = 1f;
 
         [Header("Attack")]
+        private List<Vector2> attackPoints = new List<Vector2>();
         public AttackObject actualAttack = null;
         public AttackIndexerObject attackIndexer = null;
         public Transform attackParent = null;
@@ -77,6 +78,7 @@ namespace Project {
             grid = new Grid(gridStartPosition, gridEndPosition, gridSize);
 
             enemies = new List<Entity>();
+            attackPoints = new List<Vector2>();
         }
 
         private void Start() {
@@ -93,13 +95,31 @@ namespace Project {
             switch (gameState) {
                 case GameState.COMBAT:
                     if (Input.GetButtonDown("Fire1")) {
-                        bool attacked = Attack(Camera.main.ScreenToWorldPoint(Input.mousePosition));
+                        if (actualAttack != null && !Grid.IsOutOfBounds(Camera.main.ScreenToWorldPoint(Input.mousePosition))) {
+                            attackPoints.Add(Camera.main.ScreenToWorldPoint(Input.mousePosition));
+
+                            if (actualAttack.TouchNumber == attackPoints.Count) {
+                                bool attacked = Attack(actualAttack, attackPoints);
+                                if (attacked) {
+                                    MovesRemaining -= 1;
+                                    if (MovesRemaining <= 0) {
+                                        ChangeGameState(GameState.ATTACKS_ANIMATION);
+                                    }
+                                }
+                            } else if (attackPoints.Count > actualAttack.TouchNumber) {
+                                attackPoints.Clear();
+                            }
+                        } else {
+                            attackPoints.Clear();
+                        }
+
+                        /*bool attacked = Attack(Camera.main.ScreenToWorldPoint(Input.mousePosition));
                         if (attacked) {
                             MovesRemaining -= 1;
                             if (MovesRemaining <= 0) {
                                 ChangeGameState(GameState.ATTACKS_ANIMATION);
                             }
-                        }
+                        }*/
                     }
                     break;
                 case GameState.ANIMATION:
@@ -159,18 +179,24 @@ namespace Project {
 
         #region Attacks
 
-        private bool Attack(Vector2 position) {
-            if(actualAttack == null) { return false; }
+        private bool Attack(AttackObject attack, List<Vector2> positions) {
+            if (attack == null) { return false; }
 
-            Nullable<Vector2Int> ncoord = Grid.GetCellCoord(position);
-            if (ncoord == null || Grid.IsOutOfBounds(ncoord)) { return false; }
+            List<Nullable<Vector2Int>> ncoords = new List<Nullable<Vector2Int>>();
+            for (int i = 0; i < positions.Count; i++) {
+                 ncoords.Add(Grid.GetCellCoord(positions[i]));
+                if (ncoords[i] == null || Grid.IsOutOfBounds(ncoords[i])) { return false; }
+            }
 
-            Vector2Int coord = (Vector2Int)ncoord;
+            Vector2Int[] coords = ncoords.ToList().ToArray();
 
-            Nullable<Vector2Int>[] range = actualAttack.AttackRange(coord);
+            Nullable<Vector2Int>[] range = actualAttack.AttackRange(coords);
+            if (range == null) { return false; }
 
             //DealDamange(range.ToArray());
-            actualAttack.IntantiateAttack(Grid.GetCellPosition(coord).To3D(), range.ToArray()).transform.parent = attackParent;
+            actualAttack.IntantiateAttack(Grid.GetCellPosition(coords[0]).To3D(), range.ToArray()).transform.parent = attackParent;
+
+            //TO DO : Instantiate avec plusieurs points
 
             return true;
         }
